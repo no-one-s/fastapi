@@ -1,0 +1,66 @@
+{#
+{% extends "layout.html" %}
+
+{% block content %}
+    {% for post in posts %}
+    <h2>{{ post.title }}</h2>
+    <p>{{ post.content }}</p>
+
+
+    {% endfor %}
+{% endblock content %}
+
+#}
+
+
+{#
+<!-- *jinja2 let us access the dictionary values using the key name. for example we can access the title of post 1 using {{ post[1].title }} -->
+
+<!-- * to pass variables: -->
+{{ posts[1].title }}
+
+<!--*for loop: -->
+{% for post in posts %}
+<h2>{{ post.title }}</h2>
+{% endfor %}
+
+<!--*if else: -->
+{%if title%}
+{{ title }}
+{%else%}
+My FastAPI App
+{%endif%}
+#}
+
+
+
+
+
+
+{% extends "layout.html" %}
+{% block content %}
+  {% for post in posts %}
+    <article class="content-section py-3 px-4 mb-4">
+      <div class="d-flex align-items-start gap-4">
+        <img class="rounded-circle article-img flex-shrink-0"
+             {#src="/static/profile_pics/default.jpg"#}
+             src="{{ url_for('static', path='profile_pics/default.jpg') }}"
+             alt="{{ post.author }}'s profile picture"
+             width="64"
+             height="64"
+             loading="lazy">
+        <div class="flex-grow-1">
+          <div class="article-metadata mb-2">
+            <a class="me-2" href="#">{{ post.author }}</a>
+            <small class="text-body-secondary">{{ post.date_posted }}</small>
+          </div>
+          <h2>
+            <a class="article-title" href="#">{{ post.title }}</a>
+          </h2>
+          <p class="article-content">{{ post.content }}</p>
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+{% endblock content %}
+
