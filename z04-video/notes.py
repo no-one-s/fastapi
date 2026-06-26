@@ -2,11 +2,11 @@ from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-from fastapi.exceptions import RequestValidationError #*handle validation errors
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException #* the fastapi is actually built on starlette,so when we go to path like /dne/ its starlette that handle these errors
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-
+from schemas import PostCreate,PostResponse #* importing our created schemas 
 
 posts: list[dict] = [
     {
@@ -52,28 +52,46 @@ def post_page(post_id:int, request: Request):
             )
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Post not found')
 
-@app.get("/api/posts/{post_id}")
+@app.get("/api/posts", response_model=list[PostResponse])#*with using responce_model we are passing our schemas, it update docs and do validation
+def get_posts():                                     #*responce model: if fields more then schemas are passed through then it will auto filter out the extra field and if less is passed through then it will give error
+    return posts                                     #*so it prevents accidental exposer of data
+
+@app.post(
+    "/api/posts",
+    response_model=PostResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_post(post: PostCreate):
+    new_id = max(p["id"] for p in posts) + 1 if posts else 1
+    new_post = {
+        "id": new_id,
+        "author": post.author,
+        "title": post.title,
+        "content": post.content,
+        "date_posted": "April 23, 2025",
+    }
+    posts.append(new_post)
+    return new_post
+
+@app.get("/api/posts/{post_id}", response_model=PostResponse)#* here we didnt use list on response model. as a single post is passed through
 def get_post(post_id:int):
-    #* by writing post_id:int we are classifing that post_id is a intiger. if anything non integer pass through it then fastapi will automatically return a 422 code and error msg saying "Input should be a valid integer, unable to parse string as an integer"
     for post in posts:
         if post_id == post['id']:
-            return post
-#   raise HTTPException(status_code=404, detail='Post not found') #* raising httpexceception is the best way to handle errors in fastapi as simply  returning 'not_found' as string will give 200 ok status code.
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Post not found') #* using status let use also transmit the meaning of code with code.
+            return post 
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Post not found') 
 
 
-#* there are majorlly two type of error handleing we have to first if path do not exist(using starlette) and if path parameter input type is wrong (request validation excepiton)
-#* and in both we have saparated html and api(json) exception
+
+
 
 ## StarletteHTTPException Handler
 @app.exception_handler(StarletteHTTPException)
 def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
     message = (
         exception.detail
-        if exception.detail #* this will handle if details of exception exits on starlette or not if it didnt find one then else will pass
+        if exception.detail
         else "An error occurred. Please check your request and try again."
     )
-    #*given below if statement is to seperate aip request from html. for api we give json error message and for html we show them error.html page
     if request.url.path.startswith("/api"):
         return JSONResponse(
             status_code=exception.status_code,
@@ -87,9 +105,8 @@ def general_http_exception_handler(request: Request, exception: StarletteHTTPExc
             "title": exception.status_code,
             "message": message,
         },
-        status_code=exception.status_code, #* this is added to show error code in cli
+        status_code=exception.status_code, 
     )
-#*the given above starlette exception handler do not handle type validation errors like in post_id we pass a string intead of a integer
 
 
 
@@ -98,7 +115,7 @@ def general_http_exception_handler(request: Request, exception: StarletteHTTPExc
 ### RequestValidationError Handler
 @app.exception_handler(RequestValidationError)
 def validation_exception_handler(request: Request, exception: RequestValidationError):
-    if request.url.path.startswith("/api"):#* checks if typevalidation error is from api request 
+    if request.url.path.startswith("/api"): 
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={"detail": exception.errors()},
