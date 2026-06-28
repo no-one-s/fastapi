@@ -73,7 +73,7 @@ def create_post(post: PostCreate):
     posts.append(new_post)
     return new_post
 
-@app.get("/api/posts/{post_id}", response_model=PostResponse)#* here we didnt use list on response model. as a single post is passed through
+@app.get("/api/posts/{post_id}", response_model=PostResponse)#* here we didnt use list on response model. as a single post is passed through.
 def get_post(post_id:int):
     for post in posts:
         if post_id == post['id']:

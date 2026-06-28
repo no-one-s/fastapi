@@ -31,7 +31,7 @@ templates = Jinja2Templates(directory="templates")
 # def read_item(request: Request):
 #     return templates.TemplateResponse(  
 #         request=request,
-#         name="home.html") #*name o file
+#         name="home.html") #*name of file
 #* given in return is the new way to write/pass tamplates in fastapi
 
 

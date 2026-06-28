@@ -38,7 +38,7 @@
 # @app.get("/posts", response_class=HTMLResponse)
 # def read_item():
 
-# @app.get("/posts", response_class=HTMLResponse, include_in_schema=False)    //this will hide the endpoint from the documentation page
+# @app.get("/posts", response_class=HTMLResponse, include_in_schema=False)    #//* this will hide the endpoint from the documentation page
 # def read_item():
     
     

@@ -73,7 +73,7 @@ def general_http_exception_handler(request: Request, exception: StarletteHTTPExc
         if exception.detail #* this will handle if details of exception exits on starlette or not if it didnt find one then else will pass
         else "An error occurred. Please check your request and try again."
     )
-    #*given below if statement is to seperate aip request from html. for api we give json error message and for html we show them error.html page
+    #*given below if statement is to seperate api request from html. for api we give json error message and for html we show them error.html page
     if request.url.path.startswith("/api"):
         return JSONResponse(
             status_code=exception.status_code,
